@@ -1,6 +1,7 @@
 package eu.plumbr.clean.$5_ReferenceQueue;
 
 import eu.plumbr.clean.Movie;
+import java.util.concurrent.TimeUnit;
 
 public class SharedMoviePlayer {
   private static final EnqueuingCatalog catalog = new EnqueuingCatalog();
@@ -14,7 +15,7 @@ public class SharedMoviePlayer {
     new SharedMoviePlayer().play("The World Is Not Enough", "JPoint3");
     new SharedMoviePlayer().play("The World Is Not Enough", "JPoint3");
     new SharedMoviePlayer().play("The World Is Not Enough", "JPoint3");
-    new SharedMoviePlayer().play("The World Is Not Enough", "JPoint3");
-    new SharedMoviePlayer().play("The World Is Not Enough", "JPoint3");
+    System.gc();
+    TimeUnit.SECONDS.sleep(5);
   }
 }

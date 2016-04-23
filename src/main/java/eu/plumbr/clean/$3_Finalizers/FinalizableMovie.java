@@ -9,7 +9,10 @@ public class FinalizableMovie extends Movie {
   }
 
   public void finalize() throws Throwable {
-    release();
-    super.finalize();
+    try {
+      release();
+    } finally {
+      super.finalize();
+    }
   }
 }

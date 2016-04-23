@@ -1,15 +1,15 @@
 package eu.plumbr.clean.$6_Cleaner;
 
 import eu.plumbr.clean.Movie;
-//import java.lang.ref.Cleaner;
+import java.lang.ref.Cleaner;
 
 class Catalog {
 
-//  private static final Cleaner cleaner = Cleaner.create();
+  private static final Cleaner cleaner = Cleaner.create();
 
   Movie find(String name) {
     Movie result = new Movie(name);
-//    cleaner.register(result, new MovieCleaningAction(name));
+    cleaner.register(result, new MovieCleaningAction(name));
     return result;
   }
 

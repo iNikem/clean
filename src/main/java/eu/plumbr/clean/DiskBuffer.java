@@ -3,7 +3,7 @@ package eu.plumbr.clean;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class DiskBuffer {
-  public static int fetchToLocalBuffer(String resourceName) {
+  static int fetchToLocalBuffer(String resourceName) {
     System.out.printf("Fetching %s to local buffer.%n", resourceName);
     return ThreadLocalRandom.current().nextInt(1_000);
   }

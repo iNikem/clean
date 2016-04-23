@@ -4,33 +4,32 @@ import eu.plumbr.clean.DiskBuffer;
 import eu.plumbr.clean.Movie;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 class EnqueuingCatalog {
 
-  private static final List<MovieReference> refs = new ArrayList<>();
+  private static Set<MovieReference> refs = new HashSet<>();
   private static ReferenceQueue<Movie> queue = new ReferenceQueue<>();
   private HashMap<String, WeakReference<Movie>> movies = new HashMap<>();
 
   EnqueuingCatalog() {
-    Thread t = new Thread(() -> {
+    Thread thread = new Thread(() -> {
       while (true) {
-        MovieReference reference = (MovieReference) queue.poll();
-        if (reference != null) {
+        try {
+          MovieReference reference = (MovieReference) queue.remove();
           DiskBuffer.releaseBuffer(reference.bufferRef);
+          refs.remove(reference);
           remove(reference.name);
           reference.clear();
-
-          synchronized (refs) {
-            refs.remove(reference);
-          }
+        } catch (InterruptedException ex) {
+          ex.printStackTrace();
         }
       }
     });
-    t.setDaemon(true);
-    t.start();
+    thread.setDaemon(true);
+    thread.start();
   }
 
   synchronized Movie find(String name) {
