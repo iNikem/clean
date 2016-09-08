@@ -10,7 +10,7 @@ import java.util.Set;
 
 class EnqueuingCatalog {
 
-  private static Set<MovieReference> refs = new HashSet<>();
+  private static final Set<MovieReference> refs = new HashSet<>();
   private static ReferenceQueue<Movie> queue = new ReferenceQueue<>();
   private HashMap<String, WeakReference<Movie>> movies = new HashMap<>();
 
@@ -20,7 +20,9 @@ class EnqueuingCatalog {
         try {
           MovieReference reference = (MovieReference) queue.remove();
           DiskBuffer.releaseBuffer(reference.bufferRef);
-          refs.remove(reference);
+          synchronized (refs) {
+            refs.remove(reference);
+          }
           remove(reference.name);
           reference.clear();
         } catch (InterruptedException ex) {

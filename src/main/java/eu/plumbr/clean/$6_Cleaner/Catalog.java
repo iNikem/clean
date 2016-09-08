@@ -1,29 +1,48 @@
 package eu.plumbr.clean.$6_Cleaner;
 
+import eu.plumbr.clean.DiskBuffer;
 import eu.plumbr.clean.Movie;
 import java.lang.ref.Cleaner;
+import java.lang.ref.WeakReference;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 class Catalog {
+
+  private Map<String, WeakReference<Movie>> movies = new ConcurrentHashMap<>();
 
   private static final Cleaner cleaner = Cleaner.create();
 
   Movie find(String name) {
-    Movie result = new Movie(name);
-    cleaner.register(result, new MovieCleaningAction(name));
-    return result;
+    WeakReference<Movie> movieRef = movies.get(name);
+    if (movieRef == null || movieRef.get() == null) {
+      Movie movie = new Movie(name);
+      movies.put(name, new WeakReference<>(movie));
+
+      int bufferRef = movie.fetch();
+
+      cleaner.register(movie, new MovieCleaningAction(bufferRef, name));
+
+      return movie;
+    } else {
+      return movieRef.get();
+    }
   }
 
-  private static class MovieCleaningAction implements Runnable {
+  private class MovieCleaningAction implements Runnable {
 
-    private String cacheReference;
+    private final int bufferRef;
+    private final String movieName;
 
-    MovieCleaningAction(String cacheReference) {
-      this.cacheReference = cacheReference;
+    MovieCleaningAction(int bufferRef, String movieName) {
+      this.bufferRef = bufferRef;
+      this.movieName = movieName;
     }
 
     @Override
     public void run() {
-      System.out.printf("Deleting cache for %s via Cleaner.%n", cacheReference);
+      DiskBuffer.releaseBuffer(bufferRef);
+      movies.remove(movieName);
     }
   }
 }
